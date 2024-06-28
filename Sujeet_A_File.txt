@@ -1,0 +1,30 @@
+Paymentech chargeback -  A file
+--------------------------------
+Paymentech chargeback File comes in chase server. 
+
+1-->paymentechfileparser API 
+      - picks file from chase server
+	  - loads it into working dir	
+      - reads this data and loads table chargeback_details	  
+ 
+2-->chargebackenrichment API:
+         - Chargeback file data is enriched with payment_txn_details data and loads into table payment_outgoing_feed and  IDW feed is  generated for reporting.
+         - For enriching it invokes paymenttxnHistoryv3 API .
+         - A validation is done and chargeback eligibile records are updated in payment_backout_outgoing_feed - PTCH File.
+
+3-->Chargeback Negative File API  :		 
+		 - Chargeback Negative file API invoked for negative file checks.
+		 - It populates table chargeback_negative_file_log 
+
+4-->Chargeback Enrichment Exception processor  API:
+		- When chargebackenrichment fails, Logs exception in chargeback_error_details table.
+		- The API looksup the chargeback_error_details table for any retryable errors, and try to reprocess  
+		- max retry =3
+
+5-->Chargeback Backout Batch API :
+       -  This is used for generating the PTCH file from data in table payment_backout_outgoing_feed. This will have only the chargeback records.	   
+
+
+000004---A----.dfr
+00002----A----.dfr
+00002----A---.dfr
